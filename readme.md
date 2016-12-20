@@ -28,7 +28,7 @@ Also exist a few subcommands for the MCFR522Chip byself.
 
 Commands are:
 
-- [help](#h)
+- [help](#help)
 - [get Card UID](#guid)
 - [get CardType](#gct)
 - [dump card](#dc)
