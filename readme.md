@@ -47,7 +47,8 @@ Commands are:
 
 The command 'h' shows the helpscreen.
 
-```MyFare Monitor V 2.0
+```
+MyFare Monitor V 2.0
 (c)2016 Andreas Bujok
 =============
 Help:
