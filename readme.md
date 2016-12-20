@@ -9,12 +9,12 @@ __Table of content__
 - [Usage](#Usage)
 
 
-## Install
+## Install<a id="install"></a>
 
 Copy all files in subdirectory named MyFareMonitor under your Arduino directory.
 
 
-## Remark
+## Remark<a id="Remark"></a>
 
 These Arduino Sketch is based of the deafault MFCR522 Library (v1.1.8). 
 
@@ -26,7 +26,7 @@ Also exist a few subcommands for the MCFR522Chip byself.
 >
 > BE CAREFULLY. ON WRONG SIZE OF LENGTH, THE INFECTED SECTOR WILL BE BLOCKED FOR EVER! 
 
-## Usage
+## Usage<a id="Usage"></a>
 
 Commands are:
 
