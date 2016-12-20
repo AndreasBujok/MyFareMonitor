@@ -66,6 +66,7 @@ Help:
 
 
 ## get Card UID
+ddddd
 
 
 ```
@@ -74,19 +75,19 @@ Syntax: guid
 
 
 ## get CardType
-
+ddd
 ```
 Syntax: gct
 ```
 
 ## dump card
-
+ddd
 ```
 Syntax: dc
 ```
 
 ## dump sector
-
+ddd
 ```
 Syntax: ds,<sector>
 Usage: Dumps the blocks of sector 4 'ds,4' 
@@ -94,56 +95,56 @@ Usage: Dumps the blocks of sector 4 'ds,4'
 
 
 ## dump block as ascii
-
+ddd
 ```
 Syntax: dba,<block n>
 Usage: Dumps 16 Bytes as ASCII of block 3 'dba,3' 
 ```
 
 ## dump block as HEX
-
+ddd
 ```
 Syntax: dba,<block n>
 Usage: Dumps 16 Bytes as HEX of block 0 'dbh,0' 
 ```
 
 ## write ascii text to block
-
+ddd
 ```
 Syntax: wba,<block n>,<ASCII text>,[<start position>]
 Usage: Write 'Hello' to block 2, start on position 3 'wba,2,Hello,3' 
 ```
 
 ## write hex values to block
-
+ddd
 ```
 Syntax: wbh,<block n>,<2-digit HEX values>,[<start position>]
 Usage: Write 'FF06AA' to block 5, start on position 3 'wbh,5,FF06AA,3' 
 ```
 
 ## get Rx Gain
-
+dd
 ```
 Syntax: gg
 Usage: Get the Gain (dB) of the receiver 'gg'
 ```
 
 ## set Rx gain
-
+dd
 ```
 Syntax: sg,<0-7>
 Usage: Set the Gain of the receiver to 48dB 'sg,7'
 ```
 
 ## dump key A
-
+dd
 ```
 Syntax: dk
 Usage: Get the hex values of Key A 'dk'
 ```
 
 ## set key A
-
+dd
 ```
 Syntax: sk,<2-digit HEX values>
 Usage: Set the Key A to ff014367ea09 'sk,ff014367ea09'
