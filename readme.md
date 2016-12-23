@@ -2,6 +2,10 @@
 
 The MyFareMonitor kombines a lot of functions of the Arduino MFCR522 Library (v1.1.8).
 
+
+![Fritzing](AMyFareMonitor.png)
+
+
 __Table of content__
 
 - [Install](#install)
