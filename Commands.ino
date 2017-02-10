@@ -365,7 +365,7 @@ void cmd_Help(String txt)
 	Serial.println(F(" hex2ab,<value 0>,<value 1>,<value 2> : convert hex values to access bits for trailerblock"));
 	Serial.println();
 	Serial.println(F(" dc    : dump card, use fix the transportkey."));
-	Serial.println(F(" ds,<sector> : dump sector <0-n>, use fix the transportkey."));
+	Serial.println(F(" ds,<sector> : dump sector <0-n>, use key as auth A."));
 	Serial.println(F(" dba,<block>,[<'a'|'b'>] : dump in ascii of block <0-n> with KEY A|B (default is A)"));
 	Serial.println(F(" dbh,<block>,[<'a'|'b'>] : dump in HEX of block <0-n> with KEY A|B (default is A)"));
 	Serial.println(F(" wba,<block>,<ascii-data>,[<'a'|'b'>],[<startpoint>] : write ascii text to block <0-n> (max. 16 char.), with key A|B (default is A), start position (default is 1)"));

@@ -183,7 +183,8 @@ Syntax: dc
 [back to usage] (#Usage)
 
 ## dump sector<a id="ds"></a>
-Shows the blocks of the given sector.
+Shows the blocks of the given sector.<br>
+Use 'key' for auth A.
 
 ```
 Syntax: ds,<sector>
