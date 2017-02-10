@@ -71,20 +71,21 @@ Help:
  gg    : get Rx Gain
  sg,<gain> : set Rx gain <0-7> (18dB - 48dB)
  dk        : dump key
- sk,<KEY> : set key (6 hex values)
+ sk,<KEY> : set key (6 hex values). Has <KEY> no value, key will be set to transport key.
+ ab2hex,<value block 0>,<value block 1>,<value block 2>,<value block 3> : convert access bits to hex values for trailerblock
+ hex2ab,<value 0>,<value 1>,<value 2> : convert hex values to access bits for trailerblock
 
- dc    : dump card
- ds,<sector> : dump sector <0-n>
+ dc    : dump card, use fix the transportkey.
+ ds,<sector> : dump sector <0-n>, use fix the transportkey.
  dba,<block>,[<'a'|'b'>] : dump in ascii of block <0-n> with KEY A|B (default is A)
  dbh,<block>,[<'a'|'b'>] : dump in HEX of block <0-n> with KEY A|B (default is A)
  wba,<block>,<ascii-data>,[<'a'|'b'>],[<startpoint>] : write ascii text to block <0-n> (max. 16 char.), with key A|B (default is A), start position (default is 1)
  wbh,<block>,<hex-data>  ,[<'a'|'b'>],[<startpoint>] : write hex values to block <0-n> (max. 32 char.), with key A|B (default is A), start position (default is 1)
 
- stb,<trailerblock>,<bits 0-2 block 0>,<bits 0-2 block 1>,<bits 0-2 block 2>,<bits 0-2 block 3> : set trailerblock
  sv,<block>,<val> : set value to valueblock <n>
  gv,<block> : get value of valueblock <n>
  iv,<block>,<val> : increment valueblock <n> with value <val>
- dv,<block>,<val> : decrement valueblock <n> with value <val>```
+ dv,<block>,<val> : decrement valueblock <n> with value <val>```
 
 [back to usage] (#Usage)
 
