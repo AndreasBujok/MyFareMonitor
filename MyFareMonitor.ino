@@ -3,21 +3,22 @@
 	MyFare Monitor Monitor
 	(c) 2016
 	Andreas Bujok
+	
+	http://tutorials.boecker-systemelektronik.de/MFRC522-Programmierung_mit_Arduino/PdM_12.html
+	http://tutorials.boecker-systemelektronik.de/Mifare_S50-Chip/S50_1.html
 */
 
 
 #include <SPI.h>
 #include <MFRC522.h>
-#include <LiquidCrystal.h>
 
-#define LCD_RS 7
-#define LCD_ENABLE 6
-#define LCD_D4 5
-#define LCD_D5 4
-#define LCD_D6 3
-#define LCD_D7 2
-// initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(LCD_RS,LCD_ENABLE,LCD_D4,LCD_D5,LCD_D6,LCD_D7);
+
+#define DEBUG 1 // enable command "m", show free SRAM.
+
+#if DEBUG
+	// http://www.domore.be/1arduino-understanding-memory-management.aspx
+	#include <MemoryFree.h>
+#endif
 
 // initialize the MFRCS522 library
 #define SS_PIN 10 // RFID-RC522 SDA
@@ -34,7 +35,7 @@ byte size = sizeof(buffer);
 byte readbackblock[18];
 
 
-String version = "2.0";
+String version = "2.3 (2017-02-09)";
 String logo = "MyFare Monitor V "+version+"\r\n(c)2016 Andreas Bujok";
 
 int hint;
@@ -43,7 +44,7 @@ String gain_str[] ={"18dB","23dB","18dB","23dB","33dB","38dB","43dB","48dB"};
 
 String inputString = ""; // a string to hold incoming data
 boolean stringComplete = false; // whether the string is complete
-#define para_max 5 //maximum of parameter
+#define para_max 6 //maximum of parameter
 String cmd[para_max]; // command parameter buffer
 
 /**============================================
@@ -52,76 +53,91 @@ String cmd[para_max]; // command parameter buffer
 * Start is optinal, set the text startposition (1-16),
 * default is 0 => position 1
 ==============================================*/
-void cmd_WriteBlock(byte blockAddr,String data,boolean hex,byte start = 0)
+void cmd_WriteBlock(byte blockAddr,String data,boolean hex,boolean keytype, byte start = 0)
 	{
-	Serial.print("start: ");
+	Serial.print(F("start: "));
 	Serial.println(start);
-	// Authenticate using key A
-	status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A,blockAddr,&key,&(mfrc522.uid));
+	
+	if (keytype == true)
+		{
+		// Authenticate using key B
+		status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_B,blockAddr,&key,&(mfrc522.uid));
+		Serial.println(F("Use key as auth B"));
+		}
+	else
+		{
+		// Authenticate using key A
+		status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A,blockAddr,&key,&(mfrc522.uid));
+		Serial.println(F("Use key as auth A"));
+		}
+	//status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A,blockAddr,&key,&(mfrc522.uid));
+	
+	
 	if (status != MFRC522::STATUS_OK)
 		{
 		Serial.print(F("PCD_Authenticate() failed: "));
 		Serial.println(mfrc522.GetStatusCodeName(status));
-		return;
-		}
-	
-	// Read block
-	status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
-	if (status != MFRC522::STATUS_OK)
-		{
-		Serial.print(F("MIFARE_Read() failed: "));
-		Serial.println(mfrc522.GetStatusCodeName(status));
-		}
-	//Fill data -> buffer
-	int len = data.length();
-	
-	if (hex == false)
-		{
-		if (len > 16){len = 16;}
 		}
 	else
 		{
-		if (len > 32){len = 32;}
-		}
-	
-	if (start > 0){start--;}
-	
-	int XX;
-	int Y = start;
-	// fill input into buffer
-	for (byte i = 0; i < len; i++)
-		{
+		// Read block
+		status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &size);
+		if (status != MFRC522::STATUS_OK)
+			{
+			Serial.print(F("MIFARE_Read() failed: "));
+			Serial.println(mfrc522.GetStatusCodeName(status));
+			}
+		//Fill data -> buffer
+		int len = data.length();
 		
 		if (hex == false)
 			{
-			XX = data.charAt(i);
-			buffer[Y] = XX;
+			if (len > 16){len = 16;}
 			}
 		else
 			{
-			String dummy = String(data.substring(i,i+2));
-			int hex = (int) strtol(&dummy[0],NULL,16);
-			buffer[Y] = hex;
-			Serial.print("Buffer #");
-			Serial.println(Y);
-			i++;
-			
+			if (len > 32){len = 32;}
 			}
-		Y++;
-		}
-	
-	Serial.print("Block ");
-	Serial.print(blockAddr);
-	Serial.println(" now:");
-	dump_byte_array(buffer,16,hex);
-	Serial.println();
-	// Write block
-	status = mfrc522.MIFARE_Write(blockAddr, buffer, 16);
-	if (status != MFRC522::STATUS_OK)
-		{
-		Serial.print(F("MIFARE_Write() failed: "));
-		Serial.println(mfrc522.GetStatusCodeName(status));
-		return;
+		
+		if (start > 0){start--;}
+		
+		int XX;
+		int Y = start;
+		// fill input into buffer
+		for (byte i = 0; i < len; i++)
+			{
+			
+			if (hex == false)
+				{
+				XX = data.charAt(i);
+				buffer[Y] = XX;
+				}
+			else
+				{
+				String dummy = String(data.substring(i,i+2));
+				int hex = (int) strtol(&dummy[0],NULL,16);
+				buffer[Y] = hex;
+				//Serial.print("Buffer #");
+				//Serial.println(Y);
+				i++;
+				
+				}
+			Y++;
+			}
+		
+		Serial.print("Block ");
+		Serial.print(blockAddr);
+		Serial.println(" will be:");
+		dump_byte_array(buffer,16,hex);
+		Serial.println();
+		// Write block
+		status = mfrc522.MIFARE_Write(blockAddr, buffer, 16);
+		if (status != MFRC522::STATUS_OK)
+			{
+			Serial.print(F("MIFARE_Write() failed: "));
+			Serial.println(mfrc522.GetStatusCodeName(status));
+			return;
+			}
 		}
 	
 	// Halt PICC
@@ -147,30 +163,47 @@ void setup()
 	Serial.println();
 	
 	// Get the MFRC522 firmware version
-	Serial.print("RC522 ");
+	Serial.print(F("RC522 "));
 	mfrc522.PCD_DumpVersionToSerial();
 	
-	// define LCD to 16 * 2 Characters
-	lcd.begin(16, 2);
-	lcd.print("RFID RC522 V " + version);
+	
 	cmd_Help(logo);
 	printReady();
+	
+//	Serial.print("freeMemory()=");
+//	Serial.println(freeMemory());
+
 	}
 
 
 void loop()
 	{
-	lcd.setCursor(0, 1);
 	
 	/**=================================
 	* commands effected to MFRC522 only
 	===================================*/
 	if (stringComplete)
 		{
+		
+		
 		splitString(inputString);
 		String command;
 		command = cmd[0];
 		command.toLowerCase();
+		
+		#if DEBUG
+			if(command == "m")
+				{
+				Serial.print(F("SRAM freeMemory()= "));
+				Serial.print(freeMemory());
+				Serial.println(F(" Bytes."));
+				inputString = "";
+				stringComplete = false;
+				hint = 0;
+				return;
+				}
+		#endif
+		
 		
 		// help syntax
 		if(command == "h")
@@ -179,7 +212,6 @@ void loop()
 			printReady();
 			inputString = "";
 			stringComplete = false;
-			lcd.print("Command: h      ");
 			hint = 0;
 			return;
 			}
@@ -189,7 +221,6 @@ void loop()
 			{
 			cmd_DumpKey();
 			Serial.println();
-			lcd.print("Command: "+command+"            ");
 			printReady();
 			inputString = "";
 			stringComplete = false;
@@ -200,7 +231,6 @@ void loop()
 		// get gain of receiver
 		else if(command == "gg")
 			{
-			lcd.print("Command: "+command+"            ");
 			gain = (mfrc522.PCD_GetAntennaGain()) >> 4;
 			Serial.print("Gain is ");
 			Serial.println(gain_str[gain]);
@@ -214,7 +244,6 @@ void loop()
 		// set gain of receiver
 		else if(command == "sg")
 			{
-			lcd.print("Command: "+command+"            ");
 			String dummy = cmd[1];
 			gain = dummy.toInt();
 			mfrc522.PCD_SetAntennaGain(gain << 4);
@@ -233,14 +262,55 @@ void loop()
 			{
 			String dummy = cmd[1];
 			cmd_SetKey(dummy);
-			Serial.println("Setting Key A ready.");
+			Serial.println("Setting Key ready.");
 			cmd_DumpKey();
 			Serial.println();
-			lcd.print("Command: "+command+"            ");
 			printReady();
 			inputString = "";
 			stringComplete = false;
 			hint = 0;
+			}
+		// calculate acess bits
+		else if(command == "ab2hex")
+			{
+			String dummy = cmd[1];
+			byte value_0 = dummy.toInt();
+			dummy = cmd[2];
+			byte value_1 = dummy.toInt();
+			dummy = cmd[3];
+			byte value_2 = dummy.toInt();
+			dummy = cmd[4];
+			byte value_3 = dummy.toInt();
+			cmd_AccessBits2Hex(value_0,value_1,value_2,value_3);
+			
+			Serial.println();
+			printReady();
+			inputString = "";
+			stringComplete = false;
+			hint = 0;
+			return;
+			}
+		// calculate acess bits
+		else if(command == "hex2ab")
+			{
+			String dummy = cmd[1];
+			String XX = dummy.substring(0,2);
+			byte value_0 = (int) strtol(&XX[0],NULL,16);
+			dummy = cmd[2];
+			XX = dummy.substring(0,2);
+			byte value_1 = (int) strtol(&XX[0],NULL,16);
+			dummy = cmd[3];
+			XX = dummy.substring(0,2);
+			byte value_2 = (int) strtol(&XX[0],NULL,16);
+			
+			cmd_Hex2AccessBits(value_0,value_1,value_2);
+			
+			Serial.println();
+			printReady();
+			inputString = "";
+			stringComplete = false;
+			hint = 0;
+			return;
 			}
 		}
 	
@@ -274,7 +344,6 @@ void loop()
 		if(command == "guid")
 			{
 			cmd_GetUID();
-			lcd.print("Command: "+command+"            ");
 			printReady();
 			}
 		
@@ -282,7 +351,6 @@ void loop()
 		else if(command== "gct")
 			{
 			cmd_GetCardType();
-			lcd.print("Command: "+command+"            ");
 			printReady();
 			}
 		
@@ -290,17 +358,15 @@ void loop()
 		else if(command == "dc")
 			{
 			cmd_DumpCard();
-			lcd.print("Command: "+command+"            ");
 			printReady();
 			}
 		
-		// dump ector 0-n
+		// dump sector 0-n
 		else if(command == "ds")
 			{
 			String dummy = cmd[1];
 			byte sector = dummy.toInt();
 			cmd_DumpSector(sector);
-			lcd.print("Command: "+command+"            ");
 			printReady();
 			}
 		
@@ -308,11 +374,12 @@ void loop()
 		else if(command == "dbh" || command == "dba")
 			{
 			String dummy = cmd[1];
+			//boolean ktype = cmd[2];
+			boolean ktype = (cmd[2] == "b")?true:false;
 			byte blockAddr = dummy.toInt();
 			// set ASCII or HEX for output
 			boolean output = (command == "dbh")?true:false;
-			cmd_DumpBlock(blockAddr,output);
-			lcd.print("Command: "+command+"            ");
+			cmd_DumpBlock(blockAddr,output,ktype);
 			printReady();
 			}
 		
@@ -322,12 +389,76 @@ void loop()
 			String dummy = cmd[1];
 			byte blockAddr = dummy.toInt();
 			String value = cmd[2];
-			dummy = cmd[3];
-			int go = dummy.toInt();
+			boolean ktype = (cmd[3] == "b")?true:false;
+			dummy = cmd[4];
+			int pos = dummy.toInt();
 			boolean output = (command == "wbh")?true:false;
-			cmd_WriteBlock(blockAddr,value,output,go);
-			lcd.print("Command: "+command+"            ");
+			cmd_WriteBlock(blockAddr,value,output,ktype,pos);
 			printReady();
+			}
+		
+		// set value to value-block
+		else if(command == "sv")
+			{
+			String dummy = cmd[1];
+			byte blockAddr = dummy.toInt();
+			dummy = cmd[2];
+			int value = dummy.toInt();
+			cmd_SetValue(blockAddr,value);
+			
+			Serial.println();
+			printReady();
+			inputString = "";
+			stringComplete = false;
+			hint = 0;
+			return;
+			}
+		
+		// get value to value-block
+		else if(command == "gv")
+			{
+			String dummy = cmd[1];
+			byte blockAddr = dummy.toInt();
+			cmd_GetValue(blockAddr);
+			
+			Serial.println();
+			printReady();
+			inputString = "";
+			stringComplete = false;
+			hint = 0;
+			return;
+			}
+		// increment value on value-block
+		else if(command == "iv")
+			{
+			String dummy = cmd[1];
+			byte blockAddr = dummy.toInt();
+			dummy = cmd[2];
+			int value = dummy.toInt();
+			cmd_IncValue(blockAddr,value);
+			
+			Serial.println();
+			printReady();
+			inputString = "";
+			stringComplete = false;
+			hint = 0;
+			return;
+			}
+		// increment value on value-block
+		else if(command == "dv")
+			{
+			String dummy = cmd[1];
+			byte blockAddr = dummy.toInt();
+			dummy = cmd[2];
+			int value = dummy.toInt();
+			cmd_DecValue(blockAddr,value);
+			
+			Serial.println();
+			printReady();
+			inputString = "";
+			stringComplete = false;
+			hint = 0;
+			return;
 			}
 		
 		// unknown order, syntax error
@@ -338,8 +469,11 @@ void loop()
 			}
 		
 		// clear all about inputbuffer
-		GarbageCollection();
+		//GarbageCollection();
 		}
+	
+	// clear all about inputbuffer
+	GarbageCollection();
 	}
 
 

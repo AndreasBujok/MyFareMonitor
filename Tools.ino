@@ -1,7 +1,7 @@
 
-/******************************************************************
-* Helper routine to dump a byte array as hex values to Serial.
-*******************************************************************/
+///******************************************************************
+//* Helper routine to dump a byte array as hex values to Serial.
+//*******************************************************************/
 void dump_byte_array(byte *buffer, byte bufferSize,boolean show_hex)
 	{
 	for (byte i = 0; i < bufferSize; i++)
@@ -19,7 +19,7 @@ void dump_byte_array(byte *buffer, byte bufferSize,boolean show_hex)
 				}
 			else
 				{
-				Serial.print(".");
+				Serial.print(F("."));
 				}
 			}
 		}
@@ -124,6 +124,7 @@ void serialEvent()
 			{
 			stringComplete = true;
 			hint = 1;
+			Serial.println("CMD: '"+inputString+"'");
 			}
 		}
 	}
